@@ -31,3 +31,5 @@
 *.ilk
 
 *.sdf
+
+include/*
