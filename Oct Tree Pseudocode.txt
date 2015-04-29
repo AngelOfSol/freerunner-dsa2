@@ -1,0 +1,35 @@
+void need_subdivide(vector3 center, vector3 size, ListMeshes meshes)
+{
+	vector3 min = center - size/2.0f;
+	vector3 max = center + size/2.0f;
+	
+	for (int i = 0; i < meshes.Size(); i++)
+	{
+		if (meshes[i].x > min.x && meshes[i].x < max.x
+		&& meshes[i].y > min.y && meshes[i].y < max.y
+		&& meshes[i].z > min.z && meshes[i].z < max.z)
+		{
+			for (int j = i; j < meshes.Size(); j++)
+			{
+				if (meshes[j].x > min.x && meshes[j].x < max.x
+				&& meshes[j].y > min.y && meshes[j].y < max.y
+				&& meshes[j].z > min.z && meshes[j].z < max.z)
+				{
+					subdivide(center, size, meshes);
+				}
+			}
+		}
+	}
+}
+
+void subdivide(vector3 center, vector3 size, ListMeshes meshes)
+{
+	need_subdivide(center + vector3(size.x / 4.0f, size.y / 4.0f, size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(-size.x / 4.0f, size.y / 4.0f, size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(size.x / 4.0f, -size.y / 4.0f, size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(-size.x / 4.0f, -size.y / 4.0f, size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(size.x / 4.0f, size.y / 4.0f, -size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(-size.x / 4.0f, size.y / 4.0f, -size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(size.x / 4.0f, -size.y / 4.0f, -size.z / 4.0f), size / 2.0f, meshes);
+	need_subdivide(center + vector3(-size.x / 4.0f, -size.y / 4.0f, -size.z / 4.0f), size / 2.0f, meshes);
+}
