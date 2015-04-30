@@ -5,6 +5,8 @@ struct return_type_t
 {
 	int a;
 	bool good;
+	return_type_t () 
+		: a(0) { };
 };
 
 return_type_t snake_case(int param, int& param, int* param)
