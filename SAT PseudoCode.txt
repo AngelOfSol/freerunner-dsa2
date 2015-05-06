@@ -1,0 +1,77 @@
+// Separate Axis Theorm
+
+
+// These three methods belong to box/ramp
+std::vector<vector3> get_axis()
+{
+	return axis;
+}
+
+std::vector<vector3> get_points()
+{
+	return points;
+}
+
+vector3 get_center()
+{
+	return center;
+}
+
+bool separate_axis_collision(box_t& box1, box_t& box2, matrix4& transform_box1, matrix4& transform_box2)
+{
+	auto rotation_box1 = glm::mat3(transform_box1);
+	auto rotation_box2 = glm::mat3(transform_box2);
+	
+	auto axis_box1 = box1.get_axis();
+	auto axis_box2 = box2.get_axis();
+	
+	std::vector<vector3> test_axes;
+
+	for(auto i = 0; i < axis_box1.size(); i++)
+	{
+		for(auto j = 0; j < axis_box2.size(); j++)
+		{
+			if(glm::abs(axis_box1[i]) != glm::abs(axis_box2[j]))
+			{
+				test_axes.push_back(glm::normalize(glm::cross(axis_box1[i], axis_box2[j])));
+			}
+		}
+	}
+	
+	auto points_box1 = box1.get_points();
+	auto points_box2 = box2.get_points();
+	
+	auto center_box1 = rotation_box1 * box1.get_centroid() + vector3(transform_box1[3]);
+	auto center_box2 = rotation_box2 * box2.get_centroid() + vector3(transform_box2[3]);
+	
+	
+
+	
+	auto center_diff = center_box2 - center_box1;
+	
+	for(auto axis : test_axes)
+	{
+		auto distance = abs(glm::dot(axis, center_diff));
+		auto dimension_box1 = 0.0f;
+		auto dimension_box2 = 0.0f;
+		
+		for(auto point : points_box1)
+		{
+			dimension_box1 = std::max(dimension_box1, abs(glm::dot(point, axis)));
+		}	
+		
+		for(auto point : points_box2)
+		{
+			dimension_box2 = std::max(dimension_box2, abs(glm::dot(point, axis)));
+		}
+		
+		if(distance < dimension_box1 + dimension_obejct2)
+		{
+			return false;
+		}
+		
+	}
+	
+	return true;
+}
+

@@ -107,11 +107,16 @@ xcopy "$(SolutionDir)include\ME\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Com
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\res\Resource.h" />
+    <ClInclude Include="glm_helper.h" />
+    <ClInclude Include="graphics.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="summable_ring_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\BTO.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
