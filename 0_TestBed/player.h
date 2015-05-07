@@ -1,5 +1,6 @@
 #pragma once
 #include "graphics.h"
+#include "hitbox.h"
 #include "summable_ring_buffer.h"
 
 struct player_t
@@ -14,16 +15,22 @@ struct player_t
 
 	struct facing_t
 	{
-		glm::vec3 dir;
-		glm::vec3 side;
+		glm::vec2 rot;
+		glm::vec3 dir() const 
+		{
+			return glm::rotateY(glm::rotateX(glm::vec3(0.0f, 0.0f, 1.0f), this->rot.x), this->rot.y);
+		};
+		glm::mat4 transform() const {
+			return glm::rotate(this->rot.y, axis::y()) * glm::rotate(this->rot.x, axis::x());	
+		};
 		float accel;
 
 		facing_t()
-			: dir(0.0f, 0.0f, 1.0f), accel(0.0f), side(1.0f, 0.0f, 0.0f) { };
+			: accel(0.0f), rot(0.0f, 0.0f) { };
 	} facing;
 
 	player_t()
-		: pos(), vel(), accel() { };
+		: pos(), vel(), accel(){ };
 
 	void update(float time_step);
 };

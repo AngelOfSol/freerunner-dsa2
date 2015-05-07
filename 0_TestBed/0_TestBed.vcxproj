@@ -109,6 +109,9 @@ xcopy "$(SolutionDir)include\ME\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Com
     <ClInclude Include="..\res\Resource.h" />
     <ClInclude Include="glm_helper.h" />
     <ClInclude Include="graphics.h" />
+    <ClInclude Include="hitbox.h" />
+    <ClInclude Include="octree.h" />
+    <ClInclude Include="option.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="summable_ring_buffer.h" />
   </ItemGroup>
@@ -116,6 +119,9 @@ xcopy "$(SolutionDir)include\ME\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Com
     <ResourceCompile Include="..\res\BTO.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="glm_helper.cpp" />
+    <ClCompile Include="hitbox.cpp" />
+    <ClCompile Include="octree.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="source.cpp" />
   </ItemGroup>

@@ -1,17 +1,43 @@
 #pragma once
 #include "graphics.h"
+#include <vector>
+glm::mat3 try_rotate(glm::vec3 axis) ;
 
-glm::vec2 to_xz(glm::vec3 v)
-{
-	return glm::vec2(v.x, v.z);
-}
-glm::vec3 from_xz(glm::vec2 v)
-{
-	return glm::vec3(v.x, 0.0f, v.y);
-}
+glm::vec2 to_xz(glm::vec3 v);
 
-std::ostream& operator <<(std::ostream& out, glm::vec2& v)
+glm::vec3 from_xz(glm::vec2 v);
+
+std::ostream& operator <<(std::ostream& out, glm::vec2& v);
+std::ostream& operator <<(std::ostream& out, glm::vec3& v);
+
+std::vector<glm::vec3> octant_dirs();
+
+
+namespace axis 
 {
-	out << v.x << " " << v.y;
-	return out;
+	glm::vec3 x();
+	glm::vec3 y();
+	glm::vec3 z();
+	
+	template <typename T>
+	glm::vec3 x(T x) 
+	{
+		glm::vec3 axis(0.0f);
+		axis.x = static_cast<float>(x);
+		return axis;
+	}
+	template <typename T>
+	glm::vec3 y(T y) 
+	{
+		glm::vec3 axis(0.0f);
+		axis.y = static_cast<float>(y);
+		return axis;
+	}
+	template <typename T>
+	glm::vec3 z(T z) 
+	{
+		glm::vec3 axis(0.0f);
+		axis.z = static_cast<float>(z);
+		return axis;
+	}
 }
