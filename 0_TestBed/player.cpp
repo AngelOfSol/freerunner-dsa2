@@ -18,7 +18,7 @@ void player_t::update(float time_step)
 	
 	auto y_vel = axis::y(this->vel.y);
 	auto xz_vel = axis::x(this->vel.x) + axis::z(this->vel.z);
-	auto vel_val = std::min(0.35f, glm::length(xz_vel));
+	auto vel_val = std::min(0.5f, glm::length(xz_vel));
 	auto vel_dir = vel_val == 0 ? glm::vec3() : glm::normalize(xz_vel);
 	xz_vel = vel_val * vel_dir;
 

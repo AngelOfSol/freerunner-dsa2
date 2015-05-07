@@ -43,7 +43,7 @@ struct model_t
 		ret.pos = this->pos;
 		ret.rotation = this->rotate;
 
-		for(int i = 0; i < points.size(); i += 3)
+		for(unsigned int i = 0; i < points.size(); i += 3)
 		{
 			auto& p0 = points[i + 0];
 			auto& p1 = points[i + 1];
@@ -192,7 +192,8 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 
 
 	collision_r collision_test = objects.check_collisions(player_box);
-	while(collision_test.collided == true) {
+	while(collision_test.collided == true)
+	{
 		player.pos += collision_test.mtv;
 		auto to_remove = collision_test.axis * glm::dot(collision_test.axis, player.vel);
 
@@ -329,7 +330,6 @@ void check_controls(controls_t& ctrl, window_t& window)
 	
 	ctrl.delta_mouse = glm::vec2(center - mouse);
 	
-	
 	SetCursorPos(center.x, center.y);
 	SetCursor(nullptr);
 }
@@ -382,7 +382,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	models[0].scale.x = models[0].scale.z = models[0].scale.y = 50;
 	models.push_back(model_t());
 	models[1].name = "Building1";
-	models[1].pos.x = 1.0f * 60.0f;
+	models[1].pos.x = 1.0f * 55.0f;
 	models[1].pos.z = 1.0f * 70.0f;
 	models[1].pos.y = -1.0f * 47.0f;
 	models[1].scale.x = models[1].scale.z = models[1].scale.y = 50;
@@ -390,7 +390,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	models[2].name = "Building2";
 	models[2].pos.x = -1.0f * 60.0f;
 	models[2].pos.z = 1.0f * 105.0f;
-	models[2].pos.y = -1.0f * 47.0f;
+	models[2].pos.y = -1.0f * 44.0f;
 	models[2].scale.x = models[2].scale.z = models[2].scale.y = 50;
 
 	std::vector<hitbox_t> hitboxes;
@@ -425,6 +425,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		exit(0);
 
 	glClearColor(0.64f, 0.72f, 0.83f, 1.0f);
+	
+	
+	tagRECT window_map;
+	GetWindowRect(window.GetHandler(), &window_map);
+
+	auto window_center = glm::ivec2((window_map.left + window_map.right) / 2, (window_map.top + window_map.bottom) / 2);
+
+	SetCursorPos(window_center.x, window_center.y);
+	SetCursor(nullptr);
 
 	MSG msg = {0};
 	while(WM_QUIT != msg.message)

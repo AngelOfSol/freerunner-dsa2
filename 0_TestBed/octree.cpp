@@ -4,8 +4,16 @@
 collision_r octree_node::check_collisions(hitbox_t check_with)
 {
 	collision_r ret;
+	
+	// check if we're inside this octree node other wise get out early
+	ret = hit_test(this->area, check_with);
+	if(ret.collided == false)
+	{
+		return ret;
+	}
 	ret.collided = false;
 
+	
 
 
 	if(this->children.is_none())

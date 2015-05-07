@@ -107,6 +107,9 @@ collision_r hit_test(hitbox_t lhs, hitbox_t rhs)
 			if(first || overlap < glm::length(result.mtv))
 			{
 				first = false;
+
+				if(glm::dot(center_diff, test_axis) > 0)
+					test_axis = -test_axis;
 				result.mtv = overlap * test_axis;
 				result.axis = test_axis;
 			}
