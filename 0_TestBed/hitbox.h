@@ -12,6 +12,8 @@ struct hitbox_t {
 
 	static hitbox_t box(glm::vec3 dim);
 	hitbox_t get_aabb() const;
+	std::vector<glm::vec3> get_rotated() const;
+
 };
 
 

@@ -1,9 +1,13 @@
 #include "octree.h"
 
 
-std::vector<collision_r> octree_node::check_collisions(hitbox_t check_with)
+collision_r octree_node::check_collisions(hitbox_t check_with)
 {
-	std::vector<collision_r> ret;
+	collision_r ret;
+	ret.collided = false;
+
+
+
 	if(this->children.is_none())
 	{
 		for(auto& c : this->contained)
@@ -14,7 +18,7 @@ std::vector<collision_r> octree_node::check_collisions(hitbox_t check_with)
 				auto test = hit_test(*c, check_with);
 				if(test.collided == true)
 				{
-					ret.push_back(test);
+					return test;
 				}
 			}
 		}
@@ -22,7 +26,10 @@ std::vector<collision_r> octree_node::check_collisions(hitbox_t check_with)
 		for(auto& c : *this->children.unwrap())
 		{
 			auto results = c.check_collisions(check_with);
-			ret.insert(ret.end(), results.begin(), results.end());
+			if(results.collided)
+			{
+				return results;
+			}
 		}
 	}
 
@@ -36,6 +43,7 @@ octree_node create_octree(glm::vec3 center, glm::vec3 dims, std::vector<hitbox_t
 
 	auto this_box = hitbox_t::box(dims);
 	this_box.pos = center;
+	ret.area = this_box;
 	for(auto& e : elements)
 	{
 		auto result = hit_test(this_box, e);

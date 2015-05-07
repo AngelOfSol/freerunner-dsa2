@@ -190,11 +190,9 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 	player_box.rotation = axis::y()  // axis
 		* player.facing.rot.y; // angle in degrees
 
-	auto test_collisions = objects.check_collisions(player_box);
 
-
-	for(auto collision_test : test_collisions)
-	{
+	collision_r collision_test = objects.check_collisions(player_box);
+	while(collision_test.collided == true) {
 		player.pos += collision_test.mtv;
 		auto to_remove = collision_test.axis * glm::dot(collision_test.axis, player.vel);
 
@@ -223,6 +221,8 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 				// todo lerp new angle values
 			}
 		}
+
+		collision_test = objects.check_collisions(player_box);
 	}
 
 	
@@ -363,9 +363,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	auto& gl = *gl_t::GetInstance();
 	gl.InitGLDevice(window.GetHandler());
 	auto& meshes = *meshes_t::GetInstance();
-	meshes.LoadModelUnthreaded("Minecraft\\MC_Creeper.obj", "Creeper");
 	meshes.LoadModelUnthreaded("Building.obj", "Building");
 	meshes.LoadModelUnthreaded("Building.obj", "Building1");
+	meshes.LoadModelUnthreaded("Building.obj", "Building2");
 	auto& lights = *lights_t::GetInstance();
 	lights.SetPosition(glm::vec3(0, 0, 10), 1);
 	lights.SetColor(glm::vec3(1, 1, 1), 1);
@@ -382,16 +382,40 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	models[0].scale.x = models[0].scale.z = models[0].scale.y = 50;
 	models.push_back(model_t());
 	models[1].name = "Building1";
-	models[1].pos.x = -1.0f * 60.0f;
-	models[1].pos.z = -1.0f * 70.0f;
-	models[1].pos.y = -1.0f * 32.0f;
+	models[1].pos.x = 1.0f * 60.0f;
+	models[1].pos.z = 1.0f * 70.0f;
+	models[1].pos.y = -1.0f * 47.0f;
 	models[1].scale.x = models[1].scale.z = models[1].scale.y = 50;
+	models.push_back(model_t());
+	models[2].name = "Building2";
+	models[2].pos.x = -1.0f * 60.0f;
+	models[2].pos.z = 1.0f * 105.0f;
+	models[2].pos.y = -1.0f * 47.0f;
+	models[2].scale.x = models[2].scale.z = models[2].scale.y = 50;
 
 	std::vector<hitbox_t> hitboxes;
-	hitboxes.push_back(models[0].generate_hitbox(meshes.GetVertices(models[0].name)));
-	hitboxes.push_back(models[1].generate_hitbox(meshes.GetVertices(models[1].name)));
+	for(auto& model : models)
+	{
+		hitboxes.push_back(model.generate_hitbox(meshes.GetVertices(model.name)));
+	}
+	
+	glm::vec3 min = hitboxes[0].get_rotated()[0] + hitboxes[0].pos;
+	glm::vec3 max = min;
+	for(const auto& hitbox : hitboxes)
+	{
+		for(const auto& p : hitbox.get_rotated())
+		{
+			for(int i = 0; i < 3; i++)
+			{
+				min[i] = std::min(min[i], p[i] + hitbox.pos[i]);
+				max[i] = std::max(max[i], p[i] + hitbox.pos[i]);
+			}
+		}
+	}
+	auto dim = max - min;
+	auto center = min + dim / 2.0f;
 
-	auto octree = create_octree(glm::vec3(0), glm::vec3(200.0f), hitboxes);
+	auto octree = create_octree(center, dim, hitboxes);
 
 
 	player_t player;

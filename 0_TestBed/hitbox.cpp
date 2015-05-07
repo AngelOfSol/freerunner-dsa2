@@ -67,20 +67,14 @@ collision_r hit_test(hitbox_t lhs, hitbox_t rhs)
 	collision_r result;
 	result.collided = false;
 	auto l_rot = try_rotate(lhs.rotation);
-	for(auto& p : lhs.points) 
-	{
-		p = l_rot * p;
-	}
+	lhs.points = lhs.get_rotated();
 	for(auto& axis : lhs.axes)
 	{
 		axis = l_rot * axis;
 	}
 
 	auto r_rot = try_rotate(rhs.rotation);
-	for(auto& p : rhs.points)
-	{
-		p = r_rot * p;
-	}
+	rhs.points = rhs.get_rotated();
 	for(auto& axis : rhs.axes)
 	{
 		axis = r_rot * axis;
@@ -124,4 +118,14 @@ collision_r hit_test(hitbox_t lhs, hitbox_t rhs)
 	
 	result.collided = true;
 	return result;
+}
+std::vector<glm::vec3> hitbox_t::get_rotated() const
+{
+	std::vector<glm::vec3> ret = this->points;
+	auto l_rot = try_rotate(this->rotation);
+	for(auto& p : ret) 
+	{
+		p = l_rot * p;
+	}
+	return ret;
 }

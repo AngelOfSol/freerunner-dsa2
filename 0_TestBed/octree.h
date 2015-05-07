@@ -13,7 +13,8 @@ struct octree_node
 	glm::vec3 center;
 	glm::vec3 dims;
 
-	std::vector<collision_r> check_collisions(hitbox_t);
+	collision_r check_collisions(hitbox_t);
+	hitbox_t area;
 };
 
 octree_node create_octree(glm::vec3 center, glm::vec3 dims, std::vector<hitbox_t>& elements, int depth = 0);
