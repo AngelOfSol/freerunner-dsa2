@@ -176,7 +176,7 @@ void physics(player_t& player)
 		player.in_air = true;
 	}
 }
-void update(player_t& player, octree_node& objects, std::vector<model_t>& models, const controls_t& controls) 
+void update(player_t& player, octree_node& objects, std::vector<model_t>& models, const model_t& end, const controls_t& controls) 
 {
 	auto time_step = 1.0f;
 	
@@ -230,7 +230,23 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 		collision_test = objects.check_collisions(player_box);
 	}
 
-	
+	hitbox_t end_box = hitbox_t::box(glm::vec3(1.0f, 1.0f, 1.0f) * end.scale);
+	end_box.pos = end.pos;
+
+	collision_r end_test = hit_test(player_box, end_box);
+	//if the player is colliding with the end_box, give an end signal
+	//std::cout << end_test.collided;
+	if(end_test.collided)
+	{
+		//std::cout << "Mission Complete!";
+
+		//Check if there are any more levels
+		//Fade out
+		//If there are more levels, go to next level
+		//If not, end game
+		////Display 'font' via texture, allow button to restart at level 1
+		std::terminate();
+	}
 
 	// player_box.rotation = ;
 	
@@ -479,6 +495,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	auto octree = create_octree(center, dim, hitboxes);
 
+	model_t end_model;
+	end_model.name = "EndBox";
+	end_model.pos.x = -1.0f * 60.0f;
+	end_model.pos.z = 1.0f * 105.0f;
+	end_model.pos.y = -1.0f * 0.0f;
+	end_model.scale.x = end_model.scale.z = end_model.scale.y = 20.0f;
 
 	player_t player;
 	player.pos = player_start_pos;
@@ -513,7 +535,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				hitbox.checked = false;
 			}
 			check_controls(controls, window);
-			update(player, octree, models, controls);
+			update(player, octree, models, end_model, controls);
 			push_updates(meshes, models, camera, player);
 			draw(meshes, gl);
 		}
