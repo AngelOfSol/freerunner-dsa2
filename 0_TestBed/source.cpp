@@ -2,6 +2,10 @@
 #include "glm_helper.h"
 #include "hitbox.h"
 #include "octree.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+
 LRESULT CALLBACK window_callback(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// Callbacks for winapp 
@@ -354,6 +358,35 @@ void draw(meshes_t& meshes, gl_t& gl)
 	gl.GLSwapBuffers();
 }
 
+std::vector<std::string> split_string(std::string& string_to_split, char delimiter)
+{
+	std::vector<std::string> string_components;
+	auto split_start = 0;
+	do
+	{
+		auto split_end = string_to_split.find(delimiter, split_start); 
+
+		if(split_end != std::string::npos)
+		{
+			string_components.push_back(string_to_split.substr(split_start, split_end - split_start));
+			split_start = split_end + 1;
+		}
+		else
+		{
+			string_components.push_back(string_to_split.substr(split_start, split_end - split_start));
+			split_start = std::string::npos;
+		}
+	} while(split_start != std::string::npos);
+
+	return string_components;
+}
+
+glm::vec3 split_string_to_vec(std::string& string_to_split)
+{
+	std::vector<std::string> split;
+	split = split_string(string_to_split, ';');
+	return glm::vec3(std::stof(split[0]), std::stof(split[1]), std::stof(split[2]));
+}
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
 	window_t window(hInstance, nCmdShow, window_callback);
@@ -363,9 +396,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	auto& gl = *gl_t::GetInstance();
 	gl.InitGLDevice(window.GetHandler());
 	auto& meshes = *meshes_t::GetInstance();
-	meshes.LoadModelUnthreaded("Building.obj", "Building");
-	meshes.LoadModelUnthreaded("Building.obj", "Building1");
-	meshes.LoadModelUnthreaded("Building.obj", "Building2");
 	auto& lights = *lights_t::GetInstance();
 	lights.SetPosition(glm::vec3(0, 0, 10), 1);
 	lights.SetColor(glm::vec3(1, 1, 1), 1);
@@ -374,24 +404,56 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	auto& camera = *camera_t::GetInstance();
 	camera.SetPosition(glm::vec3());
 
+	// --------------
+	// Get the level information
+	std::vector<std::string> level_components;
+	std::ifstream level_file;
+	level_file.open("../level1.txt");
+
+	if(level_file.is_open())
+	{
+		std::string file_line;
+		while (getline (level_file,file_line) )
+		{
+			level_components.push_back(file_line);
+		}
+	}
+	else
+	{
+		std::cout<<"Could not open file";
+	}
+
+	auto player_start_data = split_string(level_components[0], ' '); 
+	glm::vec3 player_start_pos = split_string_to_vec(player_start_data[1]);
+	std::vector<std::string> object_components;
+	// Get the individual components of the level
+	for(auto i = 1; i < level_components.size() - 1; i++)
+	{
+		auto string_components = split_string(level_components[i], ' ');
+		for(std::string str_component: string_components)
+		{
+			object_components.push_back(str_component);
+		}
+	}
+
+	auto num_objects = 0;
+
 
 	std::vector<model_t> models;
-	models.push_back(model_t());
-	models[0].name = "Building";
-	models[0].pos.y = -1.0f * 50.0f;
-	models[0].scale.x = models[0].scale.z = models[0].scale.y = 50;
-	models.push_back(model_t());
-	models[1].name = "Building1";
-	models[1].pos.x = 1.0f * 55.0f;
-	models[1].pos.z = 1.0f * 70.0f;
-	models[1].pos.y = -1.0f * 47.0f;
-	models[1].scale.x = models[1].scale.z = models[1].scale.y = 50;
-	models.push_back(model_t());
-	models[2].name = "Building2";
-	models[2].pos.x = -1.0f * 60.0f;
-	models[2].pos.z = 1.0f * 105.0f;
-	models[2].pos.y = -1.0f * 44.0f;
-	models[2].scale.x = models[2].scale.z = models[2].scale.y = 50;
+	for(auto i = 0; i < object_components.size(); i += 4)
+	{
+		models.push_back(model_t());
+		meshes.LoadModelUnthreaded(object_components[i] + ".obj", object_components[i] + std::to_string(num_objects));
+		models[i / 4].name = object_components[i] + std::to_string(num_objects);
+		
+		glm::vec3 scale = split_string_to_vec(object_components[i+2]);
+		models[i / 4].scale = glm::vec3(50 * scale[0], 50 * scale[1], 50 * scale[2]);
+
+		models[i / 4].pos = split_string_to_vec(object_components[i+1]); 
+		models[i / 4].rotate = split_string_to_vec(object_components[i+3]);
+
+		num_objects += 1;
+	}
 
 	std::vector<hitbox_t> hitboxes;
 	for(auto& model : models)
@@ -419,6 +481,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 
 	player_t player;
+	player.pos = player_start_pos;
 	controls_t controls;
 
 	if(gl.IsNewOpenGLRunning() == false)

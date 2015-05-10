@@ -61,7 +61,7 @@ octree_node create_octree(glm::vec3 center, glm::vec3 dims, std::vector<hitbox_t
 			ret.contained.push_back(&e);
 		}
 	}
-	if(hit_count > 2 && depth < 6)
+	if(hit_count > 2 && depth < 4)
 	{
 		auto new_dims = dims / 2.0f;
 		auto new_offsets = dims / 4.0f;

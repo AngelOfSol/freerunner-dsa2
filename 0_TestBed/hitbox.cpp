@@ -86,7 +86,7 @@ collision_r hit_test(hitbox_t lhs, hitbox_t rhs)
 	{
 		for(auto r_axis : rhs.axes)
 		{
-			if(glm::dot(l_axis, r_axis) < 0.995f)
+			if(std::abs(glm::dot(l_axis, r_axis)) < 0.995f)
 			{
 				test_axes.push_back(glm::normalize(glm::cross(l_axis, r_axis)));
 			}
