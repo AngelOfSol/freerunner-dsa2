@@ -237,9 +237,9 @@ tagMSG update(player_t& player, octree_node& objects, std::vector<model_t>& mode
 
 		collision_test = objects.check_collisions(player_box);
 	}
-	std::cout << (player.in_air ? "true" : "false") << std::endl;
+	//std::cout << (player.in_air ? "true" : "false") << std::endl;
 	update_with_controls(controls, player, time_step);
-	// player_box.rotation = ;
+	// player_box.rotation = ;w
 	
 	while(player.facing.rot.y < -180)
 	{
@@ -473,7 +473,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		models.push_back(model_t());
 		meshes.LoadModelUnthreaded(object_components[i] + ".obj", object_components[i] + std::to_string(num_objects));
 		models[i / 4].name = object_components[i] + std::to_string(num_objects);
-		
 		glm::vec3 scale = split_string_to_vec(object_components[i+2]);
 		models[i / 4].scale = glm::vec3(50 * scale[0], 50 * scale[1], 50 * scale[2]);
 
