@@ -7,6 +7,10 @@ glm::vec2 to_xz(glm::vec3 v);
 
 glm::vec3 from_xz(glm::vec2 v);
 
+glm::vec2 to_yz(glm::vec3 v);
+
+glm::vec3 from_yz(glm::vec2 v);
+
 std::ostream& operator <<(std::ostream& out, glm::vec2& v);
 std::ostream& operator <<(std::ostream& out, glm::vec3& v);
 

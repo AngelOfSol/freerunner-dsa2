@@ -16,6 +16,15 @@ glm::vec3 from_xz(glm::vec2 v)
 	return glm::vec3(v.x, 0.0f, v.y);
 }
 
+glm::vec2 to_yz(glm::vec3 v)
+{
+	return glm::vec2(v.y, v.z);
+}
+glm::vec3 from_yz(glm::vec2 v)
+{
+	return glm::vec3(0.0f, v.x, v.y);
+}
+
 std::ostream& operator <<(std::ostream& out, glm::vec2& v)
 {
 	out << v.x << " " << v.y;

@@ -15,13 +15,6 @@ void player_t::update(float time_step)
 	this->accel = this->facing.accel * forward_dir + accel.y * axis::y();
 
 	update_physics(*this, time_step);
-	
-	if (abs(this->vel.y) >= 1.25)
-	{
-		this->pos = glm::vec3(0, 60, 0);
-		this->vel = glm::vec3(0);
-		this->facing.rot = glm::vec2(0);
-	}
 
 	auto y_vel = axis::y(this->vel.y);
 	auto xz_vel = axis::x(this->vel.x) + axis::z(this->vel.z);

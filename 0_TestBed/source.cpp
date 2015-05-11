@@ -171,24 +171,30 @@ void physics(player_t& player)
 	const auto gravity = -0.01f;
 	player.accel.y = gravity;
 
-	if(player.vel.y < 2 * gravity && !player.in_air)
+	if(player.vel.y < 3 * gravity && !player.in_air)
 	{
 		player.in_air = true;
 	}
 }
-void update(player_t& player, octree_node& objects, std::vector<model_t>& models, const model_t& end, const controls_t& controls) 
+tagMSG update(player_t& player, octree_node& objects, std::vector<model_t>& models, const model_t& end, const glm::vec3& start_pos, const controls_t& controls) 
 {
 	auto time_step = 1.0f;
 	
 	physics(player);
 
-	update_with_controls(controls, player, time_step);
 
 	player.update(time_step);
+	
+	if (abs(player.vel.y) >= 2.0)
+	{
+		player.pos = start_pos;
+		player.vel = glm::vec3(0);
+
+		player.facing.rot = glm::vec2(0);
+	}
 
 
-
-	hitbox_t player_box = hitbox_t::box(glm::vec3(1.0f, 2.0f, 1.0f));
+	auto player_box = hitbox_t::box(glm::vec3(1.0f, 2.0f, 1.0f));
 	player_box.pos = player.pos;
 	
 	player_box.rotation = axis::y()  // axis
@@ -202,14 +208,16 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 		auto to_remove = collision_test.axis * glm::dot(collision_test.axis, player.vel);
 
 		player.vel -= to_remove;
-		if(glm::length(axis::y() - collision_test.axis) < 0.01f)
+		if( 180.0f / glm::pi<float>() * glm::acos(glm::dot(axis::y(), collision_test.axis)) < 30.0f)
 		{
 			player.in_air = false;
 		} else 
 		{
 			if(glm::length(player.vel) > 0.001f)
 			{
-				player.vel += glm::length(to_remove) * glm::normalize(player.vel) * 0.75f;
+				// Hic sunt draconis.
+				// sorry professor we use latin as a team language
+				//player.vel += glm::length(to_remove) * glm::normalize(player.vel) * 0.75f;
 			}
 			if(glm::dot(player.facing.dir(), collision_test.axis) < 0)
 			{
@@ -229,25 +237,8 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 
 		collision_test = objects.check_collisions(player_box);
 	}
-
-	hitbox_t end_box = hitbox_t::box(glm::vec3(1.0f, 1.0f, 1.0f) * end.scale);
-	end_box.pos = end.pos;
-
-	collision_r end_test = hit_test(player_box, end_box);
-	//if the player is colliding with the end_box, give an end signal
-	//std::cout << end_test.collided;
-	if(end_test.collided)
-	{
-		//std::cout << "Mission Complete!";
-
-		//Check if there are any more levels
-		//Fade out
-		//If there are more levels, go to next level
-		//If not, end game
-		////Display 'font' via texture, allow button to restart at level 1
-		std::terminate();
-	}
-
+	std::cout << (player.in_air ? "true" : "false") << std::endl;
+	update_with_controls(controls, player, time_step);
 	// player_box.rotation = ;
 	
 	while(player.facing.rot.y < -180)
@@ -260,6 +251,26 @@ void update(player_t& player, octree_node& objects, std::vector<model_t>& models
 		player.facing.rot.y -= 360; 
 	}
 
+	hitbox_t end_box = hitbox_t::box(glm::vec3(1.0f, 1.0f, 1.0f) * end.scale);
+	end_box.pos = end.pos;
+
+	collision_r end_test = hit_test(player_box, end_box);
+	//if the player is colliding with the end_box, give an end signal
+	//std::cout << end_test.collided;
+	MSG ret = {0};
+	if(end_test.collided)
+	{
+		//std::cout << "Mission Complete!";
+		ret.message = WM_QUIT;
+		//Check if there are any more levels
+		//Fade out
+		//If there are more levels, go to next level
+		//If not, end game
+		////Display 'font' via texture, allow button to restart at level 1
+		//std::terminate();
+		//std::cout<<"Finished Level";
+	}
+	return ret;
 }
 void check_controls(controls_t& ctrl, window_t& window)
 {
@@ -442,6 +453,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	auto player_start_data = split_string(level_components[0], ' '); 
 	glm::vec3 player_start_pos = split_string_to_vec(player_start_data[1]);
 	std::vector<std::string> object_components;
+
 	// Get the individual components of the level
 	for(auto i = 1; i < level_components.size() - 1; i++)
 	{
@@ -495,12 +507,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	auto octree = create_octree(center, dim, hitboxes);
 
+	auto end_data = split_string(level_components[level_components.size() - 1], ' '); 
+	glm::vec3 end_pos = split_string_to_vec(end_data[1]);
+
 	model_t end_model;
 	end_model.name = "EndBox";
-	end_model.pos.x = -1.0f * 60.0f;
-	end_model.pos.z = 1.0f * 105.0f;
-	end_model.pos.y = -1.0f * 0.0f;
-	end_model.scale.x = end_model.scale.z = end_model.scale.y = 20.0f;
+	end_model.pos = end_pos;
+	end_model.scale = split_string_to_vec(end_data[2]) * 20.0f;
 
 	player_t player;
 	player.pos = player_start_pos;
@@ -535,7 +548,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				hitbox.checked = false;
 			}
 			check_controls(controls, window);
-			update(player, octree, models, end_model, controls);
+			msg = update(player, octree, models, end_model, player_start_pos, controls);
 			push_updates(meshes, models, camera, player);
 			draw(meshes, gl);
 		}
